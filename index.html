@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP Image Toolkit — LaFleur Marketing</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#EDE8DA;--cream2:#E4DECE;--terra:#C55231;--terra-d:#A03F22;--terra-l:#D97B5A;
+    --brown:#3D2B1F;--brown2:#5C3D2A;--warm-gray:#8C7B6B;--border:#C8BAA8;--white:#FDFAF5;
+    --success:#4A7C59;--warn:#C97B2A;--danger:#B53030;--info:#2A6B8C;
+    --serif:'Crimson Pro',Georgia,serif;--sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--cream);color:var(--brown);font-family:var(--sans);min-height:100vh;font-size:13px}
+  .header{background:var(--brown);padding:0 28px;display:flex;align-items:center;height:56px;gap:14px;border-bottom:3px solid var(--terra);position:sticky;top:0;z-index:100}
+  .logo{font-family:var(--serif);font-size:21px;font-weight:700;color:var(--cream);letter-spacing:-0.02em}
+  .logo span{color:var(--terra-l)}
+  .logo-divider{width:1px;height:22px;background:rgba(237,232,218,0.2)}
+  .logo-sub{font-size:11px;font-weight:500;color:rgba(237,232,218,0.55);letter-spacing:0.1em;text-transform:uppercase}
+  .header-conn{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background 0.3s}
+  .conn-dot.on{background:#6EC992;box-shadow:0 0 0 3px rgba(110,201,146,0.25);animation:pulse 2s infinite}
+  .conn-label{font-size:11px;color:rgba(237,232,218,0.5);font-weight:500;letter-spacing:0.04em}
+  .conn-label.on{color:#6EC992}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  .app{display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 59px)}
+  .sidebar{background:var(--white);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+  .s-section{padding:16px 20px;border-bottom:1px solid var(--border)}
+  .s-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.13em;color:var(--terra);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+  .s-label::after{content:'';flex:1;height:1px;background:var(--border)}
+  .field{margin-bottom:10px}
+  .field:last-child{margin-bottom:0}
+  .field label{display:block;font-size:10.5px;font-weight:500;color:var(--warm-gray);margin-bottom:4px;letter-spacing:0.03em}
+  .field input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--brown);font-family:var(--sans);font-size:12px;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+  .field input:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(197,82,49,0.1)}
+  .f-rel{position:relative}
+  .f-rel input{padding-right:34px}
+  .f-eye{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--warm-gray);cursor:pointer;font-size:12px}
+  .f-eye:hover{color:var(--brown)}
+  .f-hint{font-size:10px;color:var(--warm-gray);margin-top:3px;line-height:1.4}
+  .f-hint a{color:var(--terra);text-decoration:none}
+  .task-card{border:1.5px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:8px;transition:border-color 0.2s}
+  .task-card:last-child{margin-bottom:0}
+  .task-card.active{border-color:var(--terra)}
+  .task-header{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--cream);cursor:pointer;user-select:none}
+  .task-card.active .task-header{background:rgba(197,82,49,0.06)}
+  .task-check{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;font-size:9px}
+  .task-card.active .task-check{background:var(--terra);border-color:var(--terra);color:white}
+  .task-icon{font-size:15px}
+  .task-name{font-size:12px;font-weight:600;color:var(--brown);flex:1}
+  .task-badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--border);color:var(--warm-gray)}
+  .task-badge.ready{background:rgba(74,124,89,0.15);color:var(--success)}
+  .task-badge.running{background:rgba(197,82,49,0.15);color:var(--terra)}
+  .task-badge.done{background:rgba(74,124,89,0.2);color:var(--success)}
+  .task-badge.warn{background:rgba(201,123,42,0.15);color:var(--warn)}
+  .task-body{padding:10px 12px;background:var(--white);border-top:1px solid var(--border);display:none}
+  .task-card.active .task-body{display:block}
+  .task-desc{font-size:11px;color:var(--warm-gray);line-height:1.5}
+  .mode-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+  .mode-chip{padding:7px 6px;border:1px solid var(--border);border-radius:6px;background:var(--cream);color:var(--brown2);font-size:11px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;line-height:1.3}
+  .mode-chip:hover{border-color:var(--terra)}
+  .mode-chip.on{background:var(--terra);border-color:var(--terra);color:white}
+  .cpt-area{margin-top:10px}
+  .detect-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--warm-gray);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.15s;margin-bottom:8px}
+  .detect-btn:hover{border-color:var(--terra);color:var(--terra)}
+  .cpt-list{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto}
+  .cpt-item{display:flex;align-items:center;gap:8px;padding:6px 9px;background:var(--cream);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:11px;transition:border-color 0.15s}
+  .cpt-item:hover{border-color:var(--terra)}
+  .cpt-item.on{border-color:var(--terra);background:rgba(197,82,49,0.05)}
+  .cpt-item input[type=checkbox]{accent-color:var(--terra);width:12px;height:12px;flex-shrink:0}
+  .cpt-name{font-weight:500;flex:1}
+  .cpt-slug{font-size:9.5px;color:var(--warm-gray);font-family:monospace}
+  .cpt-n{font-size:9.5px;background:var(--terra);color:white;padding:1px 5px;border-radius:8px;font-weight:600}
+  .cpt-n.z{background:var(--border);color:var(--warm-gray)}
+  .cpt-hint{font-size:10px;color:var(--warm-gray);font-style:italic;padding:8px 0 0}
+  .btn{width:100%;padding:10px 14px;border:none;border-radius:7px;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.15s;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn-terra{background:var(--terra);color:white}
+  .btn-terra:hover{background:var(--terra-d);transform:translateY(-1px);box-shadow:0 4px 14px rgba(197,82,49,0.3)}
+  .btn-terra:disabled{background:var(--border);color:var(--warm-gray);cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-green{background:var(--success);color:white}
+  .btn-green:hover{background:#3A6347;transform:translateY(-1px);box-shadow:0 4px 14px rgba(74,124,89,0.3)}
+  .btn-green:disabled{background:var(--border);color:var(--warm-gray);cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--warm-gray);font-size:11.5px;padding:8px}
+  .btn-ghost:hover{border-color:var(--danger);color:var(--danger)}
+  .btn-ghost:disabled{opacity:0.4;cursor:not-allowed}
+  .btn-export{background:rgba(42,107,140,0.1);border:1px solid rgba(42,107,140,0.3);color:var(--info);font-size:11px;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all 0.15s}
+  .btn-export:hover{background:rgba(42,107,140,0.18)}
+  .btn-export:disabled{opacity:0.4;cursor:not-allowed}
+  .btn-retry{background:rgba(201,123,42,0.12);border:1px solid rgba(201,123,42,0.35);color:var(--warn);font-size:11px;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px;transition:all 0.15s;margin-right:6px}
+  .btn-retry:hover{background:rgba(201,123,42,0.2)}
+  .btn-retry:disabled{opacity:0.4;cursor:not-allowed}
+  .gap6{height:6px}.gap10{height:10px}
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .stat{background:var(--cream);border:1px solid var(--border);border-radius:7px;padding:9px 10px}
+  .stat-v{font-family:var(--serif);font-size:24px;font-weight:700;line-height:1;margin-bottom:2px;color:var(--brown)}
+  .stat-l{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--warm-gray)}
+  .stat.d .stat-v{color:var(--danger)}
+  .stat.s .stat-v{color:var(--success)}
+  .stat.w .stat-v{color:var(--warn)}
+  .stat.a .stat-v{color:var(--terra)}
+  .prog-wrap{background:var(--cream);border:1px solid var(--border);border-radius:100px;height:5px;overflow:hidden}
+  .prog-bar{height:100%;background:linear-gradient(90deg,var(--terra),var(--success));width:0%;transition:width 0.4s;border-radius:100px}
+  .prog-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--warm-gray);margin-top:4px;font-weight:500}
+  .note{background:rgba(197,82,49,0.05);border:1px solid rgba(197,82,49,0.18);border-left:3px solid var(--terra);border-radius:6px;padding:9px 11px;font-size:10.5px;color:var(--brown2);line-height:1.5}
+  .main{display:flex;flex-direction:column;overflow:hidden}
+  .tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:stretch;padding:0 20px;gap:0;flex-shrink:0}
+  .tab{padding:13px 18px 11px;font-size:12px;font-weight:500;color:var(--warm-gray);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;display:flex;align-items:center;gap:6px;margin-bottom:-1px;white-space:nowrap}
+  .tab:hover{color:var(--brown)}
+  .tab.active{color:var(--terra);border-bottom-color:var(--terra);font-weight:600}
+  .tab-count{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--border);color:var(--warm-gray)}
+  .tab-count.has{background:var(--danger);color:white}
+  .tab-count.ok{background:rgba(74,124,89,0.2);color:var(--success)}
+  .panels{flex:1;overflow:hidden;display:flex;flex-direction:column}
+  .panel{display:none;flex:1;overflow-y:auto;flex-direction:column}
+  .panel.active{display:flex}
+  .log-wrap{flex:1;padding:14px 20px;font-family:'Inter',monospace;font-size:11.5px;line-height:1.9}
+  .log-entry{display:flex;gap:9px;padding:2px 0;border-bottom:1px solid rgba(61,43,31,0.04);animation:fi 0.15s ease}
+  @keyframes fi{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
+  .l-time{color:var(--warm-gray);min-width:68px;flex-shrink:0;font-size:10.5px}
+  .l-tag{min-width:46px;font-size:9px;padding:2px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:0.08em;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;height:fit-content;margin-top:3px}
+  .l-tag.info{background:rgba(197,82,49,0.1);color:var(--terra)}
+  .l-tag.ok{background:rgba(74,124,89,0.12);color:var(--success)}
+  .l-tag.warn{background:rgba(201,123,42,0.12);color:var(--warn)}
+  .l-tag.err{background:rgba(181,48,48,0.12);color:var(--danger)}
+  .l-tag.retry{background:rgba(42,107,140,0.12);color:var(--info)}
+  .l-msg{flex:1;color:var(--brown2);word-break:break-word}
+  .l-msg .alt{color:var(--success);font-style:italic;font-weight:500}
+  .report-toolbar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--white);flex-shrink:0}
+  .report-title{font-family:var(--serif);font-size:15px;font-weight:600}
+  .report-sub{font-size:11px;color:var(--warm-gray)}
+  .report-actions{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .report-table-wrap{flex:1;overflow-y:auto;padding:0}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  thead{position:sticky;top:0;background:var(--white);z-index:10}
+  th{padding:10px 14px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--warm-gray);border-bottom:2px solid var(--border)}
+  td{padding:9px 14px;border-bottom:1px solid rgba(200,186,168,0.5);color:var(--brown2);vertical-align:middle}
+  tr:hover td{background:rgba(237,232,218,0.5)}
+  .pill{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.05em}
+  .pill-danger{background:rgba(181,48,48,0.12);color:var(--danger)}
+  .pill-warn{background:rgba(201,123,42,0.12);color:var(--warn)}
+  .pill-ok{background:rgba(74,124,89,0.12);color:var(--success)}
+  .pill-info{background:rgba(42,107,140,0.12);color:var(--info)}
+  .url-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:10px;color:var(--warm-gray)}
+  .url-cell a{color:var(--terra);text-decoration:none}
+  .url-cell a:hover{text-decoration:underline}
+  .empty-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--warm-gray);font-size:12px;text-align:center;padding:40px}
+  .empty-icon{font-size:40px}
+  .empty-title{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--brown2)}
+  .panel-header{padding:12px 20px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .ph-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
+  .ph-dot.on{background:var(--success);box-shadow:0 0 0 3px rgba(74,124,89,0.2);animation:pulse 1.5s infinite}
+  .ph-dot.err{background:var(--danger)}
+  .ph-title{font-family:var(--serif);font-size:15px;font-weight:600}
+  .ph-clear{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--warm-gray);font-size:10.5px;font-weight:500;padding:4px 10px;border-radius:5px;cursor:pointer}
+  .ph-clear:hover{border-color:var(--warm-gray);color:var(--brown)}
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">La<span>Fleur</span></div>
+  <div class="logo-divider"></div>
+  <div class="logo-sub">WP Image Toolkit · v5.2</div>
+  <div class="header-conn">
+    <div class="conn-dot" id="conn-dot"></div>
+    <div class="conn-label" id="conn-label">Not connected</div>
+  </div>
+</div>
+
+<div class="app">
+
+  <div class="sidebar">
+
+    <div class="s-section">
+      <div class="s-label">Anthropic API</div>
+      <div class="field">
+        <label>API Key</label>
+        <div class="f-rel">
+          <input type="password" id="api-key" placeholder="sk-ant-api03-…" />
+          <button class="f-eye" onclick="tv('api-key')">👁</button>
+        </div>
+        <div class="f-hint">→ <a href="https://console.anthropic.com/keys" target="_blank">console.anthropic.com/keys</a></div>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">WordPress Client</div>
+      <div class="field">
+        <label>Site URL</label>
+        <input type="text" id="wp-url" placeholder="https://clientsite.com" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="wp-user" placeholder="admin" />
+      </div>
+      <div class="field">
+        <label>Application Password</label>
+        <div class="f-rel">
+          <input type="password" id="wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" />
+          <button class="f-eye" onclick="tv('wp-pass')">👁</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Tasks</div>
+
+      <div class="task-card active" id="task-alt" onclick="toggleTask('alt')">
+        <div class="task-header">
+          <div class="task-check" id="check-alt">✓</div>
+          <div class="task-icon">🏷️</div>
+          <div class="task-name">ALT Text</div>
+          <div class="task-badge" id="badge-alt">Ready</div>
+        </div>
+        <div class="task-body">
+          <div class="task-desc">Generate descriptive ALT text using Claude Vision. Auto-retries on temporary API errors (3 attempts with backoff).</div>
+          <div class="mode-row">
+            <div class="mode-chip on" id="mode-full-alt" onclick="setAltMode('full',event)">🌐 Full Site</div>
+            <div class="mode-chip" id="mode-cpt-alt" onclick="setAltMode('cpt',event)">🎯 By Content</div>
+          </div>
+          <div class="cpt-area" id="cpt-area" style="display:none;">
+            <button class="detect-btn" onclick="detectCPTs(event)">🔍 Detect Content Types</button>
+            <div class="cpt-list" id="cpt-list"><div class="cpt-hint">Run detection first</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-card active" id="task-broken" onclick="toggleTask('broken')">
+        <div class="task-header">
+          <div class="task-check" id="check-broken">✓</div>
+          <div class="task-icon">🔴</div>
+          <div class="task-name">Broken Images</div>
+          <div class="task-badge" id="badge-broken">Ready</div>
+        </div>
+        <div class="task-body">
+          <div class="task-desc">Scan all media URLs and detect images returning 404, 403, or connection errors. Generates a downloadable CSV report.</div>
+        </div>
+      </div>
+
+      <div class="task-card active" id="task-resp" onclick="toggleTask('resp')">
+        <div class="task-header">
+          <div class="task-check" id="check-resp">✓</div>
+          <div class="task-icon">📱</div>
+          <div class="task-name">Responsive Check</div>
+          <div class="task-badge" id="badge-resp">Ready</div>
+        </div>
+        <div class="task-body">
+          <div class="task-desc">Detect images with missing dimensions, no srcset variants, or hardcoded widths in post content.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Progress</div>
+      <div class="stat-row">
+        <div class="stat a"><div class="stat-v" id="st-total">—</div><div class="stat-l">Media</div></div>
+        <div class="stat s"><div class="stat-v" id="st-done">0</div><div class="stat-l">Updated</div></div>
+        <div class="stat d"><div class="stat-v" id="st-err">0</div><div class="stat-l">Issues</div></div>
+      </div>
+      <div class="gap6"></div>
+      <div class="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+      <div class="prog-meta"><span id="prog-text">Ready</span><span id="prog-pct">0%</span></div>
+    </div>
+
+    <div class="s-section">
+      <button class="btn btn-terra" id="btn-run" onclick="runTasks()">▶ Run Selected Tasks</button>
+      <div class="gap6"></div>
+      <button class="btn btn-ghost" id="btn-stop" onclick="stopAll()" disabled>⏹ Stop</button>
+      <div class="gap10"></div>
+      <div class="note">Auto-retries on temporary API errors. Only modifies <code>alt_text</code> via REST API. Read-only scans are safe.</div>
+    </div>
+
+  </div>
+
+  <div class="main">
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('log')">📋 Activity Log</div>
+      <div class="tab" onclick="showTab('alt-report')">🏷️ ALT Results <span class="tab-count" id="tc-alt">0</span></div>
+      <div class="tab" onclick="showTab('broken-report')">🔴 Broken Images <span class="tab-count" id="tc-broken">0</span></div>
+      <div class="tab" onclick="showTab('resp-report')">📱 Responsive <span class="tab-count" id="tc-resp">0</span></div>
+    </div>
+
+    <div class="panels">
+
+      <div class="panel active" id="panel-log">
+        <div class="panel-header">
+          <div class="ph-dot" id="ph-dot"></div>
+          <div class="ph-title" id="ph-title">Activity Log</div>
+          <button class="ph-clear" onclick="clearLog()">Clear</button>
+        </div>
+        <div class="log-wrap" id="log">
+          <div class="empty-panel" id="empty-log">
+            <div class="empty-icon">🚀</div>
+            <div class="empty-title">Ready to launch</div>
+            <div>Configure your API key, WordPress client,<br>select tasks and click <strong>Run Selected Tasks</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-alt-report">
+        <div class="report-toolbar">
+          <div>
+            <div class="report-title">ALT Text Results</div>
+            <div class="report-sub" id="alt-report-sub">No data yet — run the ALT Text task first</div>
+          </div>
+          <div class="report-actions">
+            <button class="btn-retry" id="btn-retry-alt" onclick="retryFailedAlt()" disabled>🔄 Retry Failed</button>
+            <button class="btn-export" id="btn-export-alt" onclick="exportAlt()" disabled>⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="report-table-wrap">
+          <div class="empty-panel" id="empty-alt">
+            <div class="empty-icon">🏷️</div>
+            <div class="empty-title">No results yet</div>
+            <div>Run the ALT Text task to see generated texts here</div>
+          </div>
+          <table id="tbl-alt" style="display:none;">
+            <thead><tr><th>ID</th><th>File</th><th>Generated ALT Text</th><th>Status</th></tr></thead>
+            <tbody id="tbody-alt"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-broken-report">
+        <div class="report-toolbar">
+          <div>
+            <div class="report-title">Broken Images Report</div>
+            <div class="report-sub" id="broken-report-sub">No data yet — run the Broken Images task first</div>
+          </div>
+          <div class="report-actions">
+            <button class="btn-export" id="btn-export-broken" onclick="exportBroken()" disabled>⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="report-table-wrap">
+          <div class="empty-panel" id="empty-broken">
+            <div class="empty-icon">🔎</div>
+            <div class="empty-title">No scan yet</div>
+            <div>Run the Broken Images task to see results here</div>
+          </div>
+          <table id="tbl-broken" style="display:none;">
+            <thead><tr><th>ID</th><th>File</th><th>URL</th><th>HTTP Status</th><th>Used In</th></tr></thead>
+            <tbody id="tbody-broken"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-resp-report">
+        <div class="report-toolbar">
+          <div>
+            <div class="report-title">Responsive Issues Report</div>
+            <div class="report-sub" id="resp-report-sub">No data yet — run the Responsive Check task first</div>
+          </div>
+          <div class="report-actions">
+            <button class="btn-export" id="btn-export-resp" onclick="exportResp()" disabled>⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="report-table-wrap">
+          <div class="empty-panel" id="empty-resp">
+            <div class="empty-icon">📱</div>
+            <div class="empty-title">No scan yet</div>
+            <div>Run the Responsive Check task to see issues here</div>
+          </div>
+          <table id="tbl-resp" style="display:none;">
+            <thead><tr><th>ID</th><th>File</th><th>Issue</th><th>Detail</th><th>Found In</th></tr></thead>
+            <tbody id="tbody-resp"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let STOP=false, doneCount=0, errCount=0, altMode='full';
+let activeTasks={alt:true,broken:true,resp:true};
+let altResults=[], brokenResults=[], respResults=[];
+let altQueueRef=[]; // keep reference to original queue for retry
+
+const $=id=>document.getElementById(id);
+const tv=id=>{const e=$(id);e.type=e.type==='password'?'text':'password';};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function cfg(){return{url:$('wp-url').value.replace(/\/$/,'').trim(),user:$('wp-user').value.trim(),pass:$('wp-pass').value.trim(),apiKey:$('api-key').value.trim()};}
+function auth(c){return'Basic '+btoa(unescape(encodeURIComponent(c.user+':'+c.pass)));}
+function now(){return new Date().toTimeString().slice(0,8);}
+
+function log(tag,msg,type='info'){
+  const wrap=$('log');const empty=$('empty-log');if(empty)empty.remove();
+  const el=document.createElement('div');el.className='log-entry';
+  el.innerHTML=`<span class="l-time">${now()}</span><span class="l-tag ${type}">${tag}</span><span class="l-msg">${msg}</span>`;
+  wrap.appendChild(el);wrap.scrollTop=wrap.scrollHeight;
+}
+function clearLog(){$('log').innerHTML='';}
+function setDot(s){const d=$('ph-dot');d.className='ph-dot'+(s==='on'?' on':s==='err'?' err':'');}
+function setTitle(t){$('ph-title').textContent=t;}
+function setConn(on,label){$('conn-dot').className='conn-dot'+(on?' on':'');$('conn-label').className='conn-label'+(on?' on':'');$('conn-label').textContent=label;}
+function updateProg(done,total){const pct=total>0?Math.round(done/total*100):0;$('prog-bar').style.width=pct+'%';$('prog-pct').textContent=pct+'%';$('prog-text').textContent=`${done} / ${total}`;$('st-done').textContent=doneCount;$('st-err').textContent=errCount;}
+function setTabCount(tab,n,hasIssues){const el=$(`tc-${tab}`);el.textContent=n;el.className='tab-count'+(n===0?'':hasIssues?' has':' ok');}
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{const panels=['log','alt-report','broken-report','resp-report'];t.classList.toggle('active',panels[i]===id);});
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+id));
+}
+function toggleTask(name){activeTasks[name]=!activeTasks[name];const card=$(`task-${name}`);const check=$(`check-${name}`);card.classList.toggle('active',activeTasks[name]);check.textContent=activeTasks[name]?'✓':'';}
+function setAltMode(m,e){e.stopPropagation();altMode=m;$('mode-full-alt').classList.toggle('on',m==='full');$('mode-cpt-alt').classList.toggle('on',m==='cpt');$('cpt-area').style.display=m==='cpt'?'block':'none';}
+
+async function detectCPTs(e){
+  if(e)e.stopPropagation();
+  const c=cfg();if(!c.url){alert('Enter site URL first');return;}
+  const listEl=$('cpt-list');listEl.innerHTML='<div class="cpt-hint">Detecting…</div>';
+  try{
+    const res=await fetch(`${c.url}/wp-json/wp/v2/types?context=view`,{headers:{'Authorization':auth(c)}});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const types=await res.json();
+    const skip=['attachment','nav_menu_item','wp_block','wp_template','wp_template_part','wp_global_styles','wp_navigation','wp_font_family','wp_font_face','revision'];
+    const list=Object.values(types).filter(t=>!skip.includes(t.slug)).sort((a,b)=>{const o=['post','page'];const ai=o.indexOf(a.slug),bi=o.indexOf(b.slug);if(ai>-1&&bi>-1)return ai-bi;if(ai>-1)return-1;if(bi>-1)return 1;return a.name.localeCompare(b.name);});
+    listEl.innerHTML='';
+    for(const t of list){
+      const core=['post','page'].includes(t.slug);
+      const item=document.createElement('label');item.className='cpt-item'+(core?' on':'');
+      item.innerHTML=`<input type="checkbox" value="${t.slug}" ${core?'checked':''} onchange="this.closest('.cpt-item').classList.toggle('on',this.checked);event.stopPropagation()"><span class="cpt-name">${t.name}</span><span class="cpt-slug">${t.slug}</span><span class="cpt-n z" id="cn-${t.slug}">—</span>`;
+      listEl.appendChild(item);fetchCPTCount(c,t.slug);
+    }
+    log('OK',`Detected ${list.length} content types`,'ok');
+    setConn(true,c.url.replace('https://','').replace('http://',''));
+  }catch(err){listEl.innerHTML='<div class="cpt-hint">Error — check URL & credentials</div>';log('ERR',`CPT detection: ${err.message}`,'err');}
+}
+
+async function fetchCPTCount(c,slug){
+  try{const r=await fetch(`${c.url}/wp-json/wp/v2/${slug}?per_page=1&_fields=id`,{headers:{'Authorization':auth(c)}});if(!r.ok)return;const n=parseInt(r.headers.get('X-WP-Total')||'0');const el=$(`cn-${slug}`);if(el){el.textContent=n;el.className='cpt-n'+(n===0?' z':'');}}catch(e){}
+}
+
+async function fetchAll(url,c,label){
+  let page=1,all=[];
+  while(true){
+    const sep=url.includes('?')?'&':'?';
+    const r=await fetch(`${url}${sep}per_page=100&page=${page}`,{headers:{'Authorization':auth(c)}});
+    if(r.status===404)return null;
+    if(!r.ok)throw new Error(`HTTP ${r.status} on ${label}`);
+    const pages=parseInt(r.headers.get('X-WP-TotalPages')||'1');
+    const total=parseInt(r.headers.get('X-WP-Total')||'0');
+    const data=await r.json();all=all.concat(data);
+    if(page===1)log('INFO',`${label}: ${total} items`);
+    if(page>=pages)break;page++;
+  }
+  return all;
+}
+
+function extractImgIds(html){const ids=new Set();for(const m of html.matchAll(/wp-image-(\d+)/g))ids.add(parseInt(m[1]));for(const m of html.matchAll(/data-id=["'](\d+)["']/g))ids.add(parseInt(m[1]));return ids;}
+
+async function loadMediaQueue(c){
+  if(altMode==='full'){
+    log('INFO','Loading full media library…');
+    return await fetchAll(`${c.url}/wp-json/wp/v2/media?_fields=id,alt_text,source_url,mime_type,media_details,post&status=inherit`,c,'Media Library');
+  }else{
+    const slugs=Array.from(document.querySelectorAll('#cpt-list input:checked')).map(x=>x.value);
+    if(!slugs.length){log('WARN','No content types selected','warn');return[];}
+    log('INFO',`Loading content from: ${slugs.join(', ')}`);
+    const relevantIds=new Set();const usedIn={};
+    for(const slug of slugs){
+      const items=await fetchAll(`${c.url}/wp-json/wp/v2/${slug}?_fields=id,title,featured_media,content&status=publish,draft`,c,slug);
+      if(!items){log('WARN',`"${slug}" not found — skipped`,'warn');continue;}
+      for(const item of items){
+        const label=item.title?.rendered||`ID ${item.id}`;
+        if(item.featured_media>0){relevantIds.add(item.featured_media);usedIn[item.featured_media]=label;}
+        if(item.content?.rendered)extractImgIds(item.content.rendered).forEach(id=>{relevantIds.add(id);if(!usedIn[id])usedIn[id]=label;});
+      }
+    }
+    log('INFO',`Found ${relevantIds.size} image IDs across content`);
+    const idArr=Array.from(relevantIds).filter(Boolean);let all=[];
+    for(let i=0;i<idArr.length;i+=100){
+      const batch=idArr.slice(i,i+100);const params=batch.map(id=>`include[]=${id}`).join('&');
+      const r=await fetch(`${c.url}/wp-json/wp/v2/media?${params}&per_page=100&_fields=id,alt_text,source_url,mime_type,media_details,post`,{headers:{'Authorization':auth(c)}});
+      if(!r.ok)throw new Error(`HTTP ${r.status} loading media`);
+      const data=await r.json();all=all.concat(data.map(m=>({...m,_usedIn:usedIn[m.id]||'—'})));
+    }
+    return all;
+  }
+}
+
+async function img2b64(url){
+  const r=await fetch(url);if(!r.ok)throw new Error(`Download failed HTTP ${r.status}`);
+  const blob=await r.blob();
+  return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=()=>res({b64:rd.result.split(',')[1],mt:blob.type||'image/jpeg'});rd.onerror=rej;rd.readAsDataURL(blob);});
+}
+
+/* ── ALT GENERATION WITH AUTO-RETRY ── */
+async function genAltOnce(apiKey,siteUrl,imgUrl){
+  const{b64,mt}=await img2b64(imgUrl);
+  const site=siteUrl.replace(/https?:\/\//,'').replace(/\/$/,'');
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:150,system:`You are a web accessibility and SEO specialist for LaFleur Marketing working on ${site}.\nGenerate ALT TEXT: max 125 chars, English, descriptive, professional. No "Image of/Photo of". Reply ONLY with the ALT text.`,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:`Generate ALT text for this image from ${site}.`}]}]})});
+
+  // Parse response
+  if(!r.ok){
+    const txt=await r.text();
+    let msg=`API ${r.status}`;
+    try{msg=JSON.parse(txt).error?.message||msg;}catch(e){}
+    const err=new Error(msg);
+    err.status=r.status;
+    err.retryable=[429,500,502,503,504,529].includes(r.status)||/overloaded|rate.?limit/i.test(msg);
+    throw err;
+  }
+  const d=await r.json();
+  return d.content[0].text.trim().replace(/^["'.]|["'.]$/g,'');
+}
+
+async function genAlt(apiKey,siteUrl,imgUrl,logPrefix){
+  const MAX_RETRIES=3;
+  const DELAYS=[2000,5000,10000]; // 2s, 5s, 10s
+  let lastErr=null;
+
+  for(let attempt=0;attempt<=MAX_RETRIES;attempt++){
+    try{
+      return await genAltOnce(apiKey,siteUrl,imgUrl);
+    }catch(e){
+      lastErr=e;
+      // Only retry on retryable errors (overloaded, rate-limit, server errors)
+      if(!e.retryable||attempt===MAX_RETRIES)throw e;
+      const wait=DELAYS[attempt];
+      log('RETRY',`${logPrefix} ${e.message} — waiting ${wait/1000}s before retry ${attempt+1}/${MAX_RETRIES}`,'retry');
+      await sleep(wait);
+    }
+  }
+  throw lastErr;
+}
+
+async function updateAlt(c,id,alt){
+  const r=await fetch(`${c.url}/wp-json/wp/v2/media/${id}`,{method:'POST',headers:{'Authorization':auth(c),'Content-Type':'application/json'},body:JSON.stringify({alt_text:alt})});
+  if(!r.ok)throw new Error(`WP ${r.status}`);
+}
+
+async function processAltItems(c,items,startIdx=0,total=null){
+  const totalCount=total||items.length;
+  let done=0;
+  for(let i=0;i<items.length;i++){
+    if(STOP)break;
+    const item=items[i];const name=item.source_url.split('/').pop();
+    const displayIdx=startIdx+i+1;
+    log('INFO',`[ALT ${displayIdx}/${totalCount}] ${name}`);
+    let status='ok',alt='',err='';
+    try{
+      alt=await genAlt(c.apiKey,c.url,item.source_url,`[ALT ${displayIdx}]`);
+      await updateAlt(c,item.id,alt);
+      log('OK',`[ALT ${displayIdx}] <span class="alt">"${alt}"</span>`,'ok');
+      doneCount++;done++;
+    }catch(e){err=e.message;status='err';log('ERR',`[ALT ${displayIdx}] ${name}: ${e.message}`,'err');errCount++;}
+
+    // Update or insert into results
+    const existing=altResults.findIndex(r=>r.id===item.id);
+    const result={id:item.id,file:name,alt,status,err,_item:item};
+    if(existing>=0){
+      altResults[existing]=result;
+      // update existing row
+      const row=document.querySelector(`#tbody-alt tr[data-id="${item.id}"]`);
+      if(row){
+        row.innerHTML=`<td>${item.id}</td><td class="url-cell">${name}</td><td>${alt||'<span style="color:var(--warm-gray)">—</span>'}</td><td><span class="pill ${status==='ok'?'pill-ok':'pill-danger'}">${status==='ok'?'✓ Updated':'✗ Error'}</span></td>`;
+      }
+    }else{
+      altResults.push(result);
+      const tr=document.createElement('tr');
+      tr.setAttribute('data-id',item.id);
+      tr.innerHTML=`<td>${item.id}</td><td class="url-cell">${name}</td><td>${alt||'<span style="color:var(--warm-gray)">—</span>'}</td><td><span class="pill ${status==='ok'?'pill-ok':'pill-danger'}">${status==='ok'?'✓ Updated':'✗ Error'}</span></td>`;
+      $('tbody-alt').appendChild(tr);
+    }
+
+    const okCount=altResults.filter(r=>r.status==='ok').length;
+    const failCount=altResults.filter(r=>r.status==='err').length;
+    setTabCount('alt',okCount,false);
+    $('alt-report-sub').textContent=`${okCount} updated · ${failCount} errors`;
+    $('btn-export-alt').disabled=false;
+    $('btn-retry-alt').disabled=failCount===0;
+    await sleep(400);
+  }
+  return done;
+}
+
+async function runAltTask(c,media){
+  const queue=media.filter(m=>m.mime_type?.startsWith('image/')&&(!m.alt_text||!m.alt_text.trim()));
+  altQueueRef=queue;
+  log('INFO',`ALT Text: ${queue.length} images need updating`);
+  $('badge-alt').textContent='Running';$('badge-alt').className='task-badge running';
+  $('empty-alt').style.display='none';$('tbl-alt').style.display='table';
+  await processAltItems(c,queue,0,queue.length);
+  $('badge-alt').textContent='Done';$('badge-alt').className='task-badge done';
+}
+
+async function retryFailedAlt(){
+  const c=cfg();
+  const failed=altResults.filter(r=>r.status==='err');
+  if(!failed.length){log('INFO','No failed items to retry','info');return;}
+
+  log('INFO',`🔄 Retrying ${failed.length} failed item(s)…`);
+  $('btn-retry-alt').disabled=true;
+  $('btn-run').disabled=true;
+  $('btn-stop').disabled=false;
+  STOP=false;
+  setDot('on');setTitle(`Retrying ${failed.length} failed items…`);
+
+  // Reset error count from the items we're about to retry
+  errCount-=failed.length;
+
+  const items=failed.map(r=>r._item).filter(Boolean);
+  await processAltItems(c,items,0,items.length);
+
+  setDot('');
+  const stillFailed=altResults.filter(r=>r.status==='err').length;
+  setTitle(stillFailed>0?`Retry done — ${stillFailed} still failing`:`Retry complete — all good!`);
+  log('OK',`🎉 Retry finished. Failed remaining: ${stillFailed}`,'ok');
+  $('btn-run').disabled=false;
+  $('btn-stop').disabled=true;
+  $('btn-retry-alt').disabled=stillFailed===0;
+}
+
+async function checkUrl(url){
+  try{await fetch(url,{method:'HEAD',mode:'no-cors'});return{ok:true,status:'OK'};}
+  catch(e){
+    try{const r2=await fetch(url,{signal:AbortSignal.timeout(8000)});return{ok:r2.ok,status:r2.status.toString()};}
+    catch(e2){return{ok:false,status:'Network Error'};}
+  }
+}
+
+async function runBrokenTask(c,media){
+  const images=media.filter(m=>m.mime_type?.startsWith('image/'));
+  log('INFO',`Broken Images: checking ${images.length} URLs…`);
+  $('badge-broken').textContent='Running';$('badge-broken').className='task-badge running';
+  $('empty-broken').style.display='none';$('tbl-broken').style.display='table';
+  let broken=0;
+  for(let i=0;i<images.length;i++){
+    if(STOP)break;
+    const item=images[i];const name=item.source_url.split('/').pop();
+    if(i%10===0)log('INFO',`[Broken ${i+1}/${images.length}] Checking…`);
+    const{ok,status}=await checkUrl(item.source_url);
+    if(!ok){
+      broken++;errCount++;
+      log('WARN',`[Broken] 🔴 ${name} → ${status}`,'warn');
+      brokenResults.push({id:item.id,file:name,url:item.source_url,status,usedIn:item._usedIn||'—'});
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${item.id}</td><td>${name}</td><td class="url-cell"><a href="${item.source_url}" target="_blank">${item.source_url}</a></td><td><span class="pill pill-danger">${status}</span></td><td>${item._usedIn||'—'}</td>`;
+      $('tbody-broken').appendChild(tr);
+      setTabCount('broken',broken,true);
+      $('broken-report-sub').textContent=`${broken} broken images of ${i+1} checked`;
+      $('btn-export-broken').disabled=false;
+    }
+    await sleep(50);
+  }
+  if(broken===0){
+    log('OK','Broken Images: 🎉 No broken images found!','ok');
+    $('broken-report-sub').textContent=`All ${images.length} images are accessible`;
+    setTabCount('broken',0,false);
+    $('empty-broken').style.display='flex';$('empty-broken').innerHTML='<div class="empty-icon">✅</div><div class="empty-title">All images OK</div><div>No broken images detected</div>';
+    $('tbl-broken').style.display='none';
+  }
+  $('badge-broken').textContent=broken>0?`${broken} broken`:'All OK';
+  $('badge-broken').className=`task-badge ${broken>0?'warn':'done'}`;
+}
+
+async function runRespTask(c,media){
+  const images=media.filter(m=>m.mime_type?.startsWith('image/'));
+  log('INFO',`Responsive: checking ${images.length} images…`);
+  $('badge-resp').textContent='Running';$('badge-resp').className='task-badge running';
+  $('empty-resp').style.display='none';$('tbl-resp').style.display='table';
+  let issues=0;
+  for(const item of images){
+    if(STOP)break;
+    const name=item.source_url.split('/').pop();const details=item.media_details;
+    if(!details?.width||!details?.height){
+      issues++;respResults.push({id:item.id,file:name,issue:'Missing dimensions',detail:'No width/height in media metadata',foundIn:item._usedIn||'Media Library'});
+      addRespRow(item.id,name,'Missing dimensions','No width/height metadata','pill-warn',item._usedIn||'Media Library');
+    }else if(!details?.sizes||Object.keys(details.sizes).length<=1){
+      issues++;respResults.push({id:item.id,file:name,issue:'No responsive sizes',detail:'Only original size, no srcset variants',foundIn:item._usedIn||'Media Library'});
+      addRespRow(item.id,name,'No responsive sizes','Only 1 size registered','pill-warn',item._usedIn||'Media Library');
+    }else if(details.width>3000&&Object.keys(details.sizes).length<=2){
+      issues++;respResults.push({id:item.id,file:name,issue:'Oversized image',detail:`${details.width}×${details.height}px — may load slowly`,foundIn:item._usedIn||'Media Library'});
+      addRespRow(item.id,name,'Oversized image',`${details.width}×${details.height}px — few sizes`,'pill-danger',item._usedIn||'Media Library');
+    }
+  }
+  if(altMode==='cpt'){
+    const slugs=Array.from(document.querySelectorAll('#cpt-list input:checked')).map(x=>x.value);
+    for(const slug of slugs){
+      const posts=await fetchAll(`${c.url}/wp-json/wp/v2/${slug}?_fields=id,title,content&status=publish`,c,`${slug} content`);
+      if(!posts)continue;
+      for(const post of posts){
+        if(!post.content?.rendered)continue;
+        const title=post.title?.rendered||`Post ${post.id}`;
+        const matches=[...post.content.rendered.matchAll(/<img[^>]+width=["'](\d+)["'][^>]*>/gi)];
+        for(const m of matches){
+          const w=parseInt(m[1]);
+          if(w>0&&w<400){
+            issues++;respResults.push({id:post.id,file:`Post: ${title}`,issue:'Small hardcoded width',detail:`width="${w}" found in content`,foundIn:title});
+            addRespRow(post.id,`Post: ${title.slice(0,30)}`,`Hardcoded width="${w}"`,`Image in content has fixed small width`,'pill-warn',title);
+          }
+        }
+      }
+    }
+  }
+  setTabCount('resp',issues,issues>0);
+  $('resp-report-sub').textContent=`${issues} responsive issues across ${images.length} images`;
+  if(issues>0)$('btn-export-resp').disabled=false;
+  if(issues===0){
+    log('OK','Responsive: 📱✅ No issues found!','ok');
+    $('empty-resp').style.display='flex';
+    $('empty-resp').innerHTML='<div class="empty-icon">✅</div><div class="empty-title">All good!</div><div>No responsive issues detected</div>';
+    $('tbl-resp').style.display='none';
+  }
+  $('badge-resp').textContent=issues>0?`${issues} issues`:'All OK';
+  $('badge-resp').className=`task-badge ${issues>0?'warn':'done'}`;
+}
+
+function addRespRow(id,file,issue,detail,pillClass,foundIn){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${id}</td><td>${file}</td><td><span class="pill ${pillClass}">${issue}</span></td><td style="font-size:11px;color:var(--warm-gray)">${detail}</td><td style="font-size:11px">${foundIn}</td>`;
+  $('tbody-resp').appendChild(tr);
+}
+
+async function runTasks(){
+  const c=cfg();
+  if(!c.url){log('ERR','Enter site URL','err');return;}
+  if(!c.user){log('ERR','Enter WordPress username','err');return;}
+  const tasks=Object.entries(activeTasks).filter(([,v])=>v).map(([k])=>k);
+  if(!tasks.length){log('WARN','Select at least one task','warn');return;}
+  if(tasks.includes('alt')&&(!c.apiKey||!c.apiKey.startsWith('sk-ant'))){log('ERR','Valid Anthropic API key required for ALT Text','err');return;}
+
+  STOP=false;doneCount=0;errCount=0;
+  altResults=[];brokenResults=[];respResults=[];
+  $('tbody-alt').innerHTML='';$('tbody-broken').innerHTML='';$('tbody-resp').innerHTML='';
+  $('tbl-alt').style.display='none';$('tbl-broken').style.display='none';$('tbl-resp').style.display='none';
+  $('btn-retry-alt').disabled=true;
+  $('btn-run').disabled=true;$('btn-stop').disabled=false;
+  setDot('on');setTitle('Running tasks…');
+  setConn(true,c.url.replace('https://','').replace('http://',''));showTab('log');
+  log('INFO',`Starting ${tasks.length} task(s): ${tasks.join(', ')} — auto-retry enabled`);
+
+  try{
+    log('INFO','Loading media library…');
+    const media=await loadMediaQueue(c);
+    if(!media||!media.length){log('WARN','No media found','warn');return;}
+    $('st-total').textContent=media.length;
+    log('OK',`Media loaded: ${media.length} files`,'ok');
+
+    let step=0;
+    if(tasks.includes('alt')){await runAltTask(c,media);step++;updateProg(step,tasks.length);}
+    if(!STOP&&tasks.includes('broken')){await runBrokenTask(c,media);step++;updateProg(step,tasks.length);}
+    if(!STOP&&tasks.includes('resp')){await runRespTask(c,media);step++;updateProg(step,tasks.length);}
+
+    setDot('');
+    const failedAlt=altResults.filter(r=>r.status==='err').length;
+    if(STOP){setTitle('Stopped by user');log('WARN','Process stopped','warn');}
+    else{
+      setTitle(`Done — ${doneCount} updated, ${errCount} issues`);
+      log('OK',`🎉 Complete! ${doneCount} ALT updated · ${brokenResults.length} broken · ${respResults.length} responsive issues`,'ok');
+      if(failedAlt>0)log('INFO',`💡 ${failedAlt} ALT items failed. Use "Retry Failed" button on ALT Results tab to retry them.`,'info');
+    }
+  }catch(e){
+    log('ERR',`Fatal: ${e.message}`,'err');
+    if(e.message.includes('401'))log('WARN','HTTP 401 — verify username and Application Password','warn');
+    setDot('err');setTitle('Error');
+  }finally{$('btn-run').disabled=false;$('btn-stop').disabled=true;}
+}
+
+function stopAll(){STOP=true;$('btn-stop').disabled=true;log('WARN','Stopping…','warn');}
+
+function toCSV(rows,headers){const esc=v=>`"${String(v).replace(/"/g,'""')}"`;return[headers.join(','),...rows.map(r=>{const{_item,...clean}=r;return Object.values(clean).map(esc).join(',');})].join('\n');}
+function downloadCSV(csv,fn){const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=fn;a.click();}
+function exportAlt(){downloadCSV(toCSV(altResults,['ID','File','ALT Text','Status','Error']),`alt-text-${new Date().toISOString().slice(0,10)}.csv`);}
+function exportBroken(){downloadCSV(toCSV(brokenResults,['ID','File','URL','HTTP Status','Used In']),`broken-images-${new Date().toISOString().slice(0,10)}.csv`);}
+function exportResp(){downloadCSV(toCSV(respResults,['ID','File','Issue','Detail','Found In']),`responsive-${new Date().toISOString().slice(0,10)}.csv`);}
+</script>
+</body>
+</html>

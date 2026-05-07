@@ -1,0 +1,29 @@
+# Local notes / drafts (not for the public repo)
+notes/
+drafts/
+*.local.html
+
+# Test outputs / sample CSV exports (don't ship)
+exports/
+*.csv
+
+# Editor / OS junk
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup copies of the app while iterating locally
+*.bak
+*.backup
+index.html.bak
+*-old.html
+*-test.html
+
+# Secrets — paranoia layer in case anyone hardcodes by mistake
+.env
+.env.*
+*.key
+secrets.json
