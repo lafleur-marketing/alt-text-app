@@ -98,7 +98,7 @@ Add Anthropic credits at [console.anthropic.com/billing](https://console.anthrop
 
 ## Internal links
 
-- 📂 Project source: `~/Projects/lafleur-kinsta/shared/alt-text-app/`
+- 📂 Project source: `~/CLAUDE-LAFLEUR/shared/alt-text-app/`
 - 🐛 Issues: open at https://github.com/lafleur-marketing/alt-text-app/issues
 
 ---
